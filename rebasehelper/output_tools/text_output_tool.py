@@ -4,8 +4,6 @@ import os
 from rebasehelper.output_tool import BaseOutputTool
 from rebasehelper.logger import LoggerHelper, logger, logger_report
 from rebasehelper.results_store import results_store
-from rebasehelper.checker import checkers_runner
-from rebasehelper.build_log_hook import build_log_hook_runner
 
 
 class TextOutputTool(BaseOutputTool):
@@ -143,17 +141,15 @@ class TextOutputTool(BaseOutputTool):
     @classmethod
     def print_checkers_text_output(cls, checkers_results):
         """Function prints text output for every checker"""
-        for check_tool in six.itervalues(checkers_runner.checkers):
-            for check, data in sorted(six.iteritems(checkers_results)):
-                if check == check_tool.name:
-                    logger_report.info('\n'.join(check_tool.format(data)))
+        for check, data in sorted(six.iteritems(checkers_results)):
+            logger_report.info('\n'.join(cls.runner.checkers[check].format(data)))
 
     @classmethod
     def print_build_log_hooks_result(cls, build_log_hooks_result):
         for hook, data in six.iteritems(build_log_hooks_result):
             if data:
                 cls.print_message_and_separator('\n{} build log hook'.format(hook))
-                logger_report.info('\n'.join(build_log_hook_runner.build_log_hooks[hook].format(data)))
+                logger_report.info('\n'.join(cls.runner.build_log_hooks[hook].format(data)))
 
     @classmethod
     def run(cls, logs, app):  # pylint: disable=unused-argument

@@ -40,7 +40,7 @@ from six.moves import urllib
 
 from rebasehelper.logger import logger
 from rebasehelper import constants
-from rebasehelper.plugins import Plugin, PluginLoader
+from rebasehelper.plugins import Plugin
 from rebasehelper.archive import Archive
 from rebasehelper.exceptions import RebaseHelperError, DownloadError, ParseError, LookasideCacheError
 from rebasehelper.argument_parser import SilentArgumentParser
@@ -1461,40 +1461,3 @@ class BaseSpecHook(Plugin):
         :param kwargs: Keyword arguments from Application instance
         """
         raise NotImplementedError()
-
-
-class SpecHooksRunner(object):
-    """
-    Class representing the process of running various spec file hooks.
-    """
-
-    def __init__(self):
-        self.spec_hooks = PluginLoader.load('rebasehelper.spec_hooks')
-
-    def get_all_spec_hooks(self):
-        return list(self.spec_hooks)
-
-    def get_available_spec_hooks(self):
-        return [k for k, v in six.iteritems(self.spec_hooks) if v]
-
-    def run_spec_hooks(self, spec_file, rebase_spec_file, **kwargs):
-        """
-        Runs all non-blacklisted spec hooks.
-
-        :param spec_file: Original spec file object
-        :param rebase_spec_file: Rebased spec file object
-        :param kwargs: Keyword arguments from Application instance
-        """
-        blacklist = kwargs.get("spec_hook_blacklist", [])
-
-        for name, spec_hook in six.iteritems(self.spec_hooks):
-            if not spec_hook or name in blacklist:
-                continue
-            categories = spec_hook.CATEGORIES
-            if not categories or spec_file.category in categories:
-                logger.info("Running '%s' spec hook", name)
-                spec_hook.run(spec_file, rebase_spec_file, **kwargs)
-
-
-# Global instance of SpecHooksRunner. It is enough to load it once per application run.
-spec_hooks_runner = SpecHooksRunner()

@@ -22,10 +22,8 @@
 
 import os
 
-import six
 
-from rebasehelper.plugins import Plugin, PluginLoader
-from rebasehelper.logger import logger
+from rebasehelper.plugins import Plugin
 from rebasehelper.constants import RESULTS_DIR
 
 
@@ -81,46 +79,3 @@ class BaseChecker(Plugin):
         Returns:
             list: List of strings to be output to CLI as warning messages.
         """
-
-
-class CheckersRunner(object):
-    """
-    Class representing the process of running various checkers on final packages.
-    """
-
-    def __init__(self):
-        self.checkers = PluginLoader.load('rebasehelper.checkers')
-
-    def get_all_tools(self):
-        return list(self.checkers)
-
-    def get_supported_tools(self):
-        return [k for k, v in six.iteritems(self.checkers) if v]
-
-    def get_default_tools(self):
-        return [k for k, v in six.iteritems(self.checkers) if v and v.DEFAULT]
-
-    def run_checker(self, results_dir, checker_name, **kwargs):
-        """
-        Runs a particular checker and returns the results.
-
-        :param results_dir: Path to a directory in which the checker should store the results.
-        :type results_dir: str
-        :param checker_name: Name of the checker to run. Ideally this should be name of existing checker.
-        :type checker_name: str
-        :raises NotImplementedError: If checker with the given name does not exist.
-        :return: results from the checker
-        """
-        try:
-            checker = self.checkers[checker_name]
-        except KeyError:
-            return None
-        if checker.CATEGORY != kwargs.get('category'):
-            return None
-
-        logger.info("Running checks on packages using '%s'", checker_name)
-        return checker.run_check(results_dir, **kwargs)
-
-
-# Global instance of CheckersRunner. It is enough to load it once per application run.
-checkers_runner = CheckersRunner()

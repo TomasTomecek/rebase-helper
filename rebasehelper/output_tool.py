@@ -23,10 +23,9 @@
 import os
 import six
 
-from rebasehelper.plugins import Plugin, PluginLoader
-from rebasehelper.logger import logger, logger_output
+from rebasehelper.plugins import Plugin
+from rebasehelper.logger import logger_output
 from rebasehelper.results_store import results_store
-from rebasehelper.checker import checkers_runner
 from rebasehelper.constants import RESULTS_DIR, REPORT
 
 
@@ -93,7 +92,7 @@ class BaseOutputTool(Plugin):
     def print_important_checkers_output(cls):
         """Iterates over all checkers output to highlight important checkers warning"""
         checkers_results = results_store.get_checkers()
-        for check_tool in six.itervalues(checkers_runner.checkers):
+        for check_tool in six.itervalues(cls.runner.checkers):
             for check, data in sorted(six.iteritems(checkers_results)):
                 if check == check_tool.name:
                     out = check_tool.get_important_changes(data)
@@ -138,39 +137,3 @@ class BaseOutputTool(Plugin):
     @classmethod
     def run(cls, logs, app):  # pylint: disable=unused-argument
         raise NotImplementedError()
-
-
-class OutputToolRunner(object):
-    """
-    Class representing the process of running various output tools.
-    """
-
-    def __init__(self):
-        self.output_tools = PluginLoader.load('rebasehelper.output_tools')
-
-    def get_all_tools(self):
-        return list(self.output_tools)
-
-    def get_supported_tools(self):
-        return [k for k, v in six.iteritems(self.output_tools) if v]
-
-    def get_default_tool(self):
-        default = [k for k, v in six.iteritems(self.output_tools) if v and v.DEFAULT]
-        return default[0] if default else None
-
-    def run_output_tool(self, tool, logs=None, app=None):
-        """
-        Runs specified output tool.
-
-        :param tool: Tool to run
-        :param log: Log that probably contains the important message concerning the rebase fail
-        :param app: Application class instance
-        """
-        output_tool = self.output_tools[tool]
-        logger.info("Running '%s' output tool.", tool)
-        output_tool.run(logs, app=app)
-        output_tool.print_cli_summary(app)
-
-
-# Global instance of OutputToolRunner. It is enough to load it once per application run.
-output_tools_runner = OutputToolRunner()

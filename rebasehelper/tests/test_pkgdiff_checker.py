@@ -20,7 +20,7 @@
 # Authors: Petr Hracek <phracek@redhat.com>
 #          Tomas Hozza <thozza@redhat.com>
 
-from rebasehelper.checker import checkers_runner
+from rebasehelper.plugins import plugin_runner
 from .conftest import TEST_FILES_DIR
 
 
@@ -52,11 +52,11 @@ class TestPkgDiff(object):
                                    '/usr/sbin/pkg-*/binary_test;/usr/sbin/pkg-*/binary_test (1%)'],
                          'renamed': ['/usr/lib/libtest3.so.3',
                                      '/usr/lib/libtest3.so']}
-        checkers_runner.checkers['pkgdiff'].results_dir = TEST_FILES_DIR
-        checkers_runner.checkers['pkgdiff'].fill_dictionary(TEST_FILES_DIR,
-                                                            old_version='1.0.1',
-                                                            new_version='1.0.2')
-        assert checkers_runner.checkers['pkgdiff'].results_dict == expected_dict
+        plugin_runner.checkers['pkgdiff'].results_dir = TEST_FILES_DIR
+        plugin_runner.checkers['pkgdiff'].fill_dictionary(TEST_FILES_DIR,
+                                                          old_version='1.0.1',
+                                                          new_version='1.0.2')
+        assert plugin_runner.checkers['pkgdiff'].results_dict == expected_dict
 
     def test_process_xml(self):
         expected_dict = {'added': ['/usr/sbin/test',
@@ -70,8 +70,8 @@ class TestPkgDiff(object):
                                      '/usr/lib64/libtest2.so.1'],
                          'renamed': ['/usr/lib/libtest3.so.3',
                                      '/usr/lib/libtest3.so']}
-        checkers_runner.checkers['pkgdiff'].results_dir = TEST_FILES_DIR
-        res_dict = checkers_runner.checkers['pkgdiff'].process_xml_results(TEST_FILES_DIR,
-                                                                           old_version='1.0.1',
-                                                                           new_version='1.0.2')
+        plugin_runner.checkers['pkgdiff'].results_dir = TEST_FILES_DIR
+        res_dict = plugin_runner.checkers['pkgdiff'].process_xml_results(TEST_FILES_DIR,
+                                                                         old_version='1.0.1',
+                                                                         new_version='1.0.2')
         assert res_dict == expected_dict
